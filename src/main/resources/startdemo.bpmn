@@ -12,18 +12,30 @@
              xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
              xmlns:tns="http://www.jboss.org/drools">
 
-  <process processType="Private" isExecutable="true" id="startdemo" name="startdemo" tns:packageName="defaultPackage">
+  <process processType="Private" isExecutable="true" id="startdemo" name="startdemo" tns:packageName="defaultPackage" >
+
+    <property id="paymentMethod" itemSubjectRef="_paymentMethod"/>
+
 
     <!-- nodes -->
     <startEvent id="_1" name="Start" />
     <userTask id="_3" name="orderReview" >
+      <extensionElements>
+        <tns:onEntry-script scriptFormat="http://www.java.com/java">
+          <script>java.util.Map contentParam = new java.util.HashMap();
+contentParam.put("paymentMethod", paymentMethod);
+kcontext.setVariable("content", contentParam);</script>
+        </tns:onEntry-script>
+      </extensionElements>
       <ioSpecification>
+        <dataInput id="_3_paymentMethodInput" name="paymentMethod" />
         <dataInput id="_3_CommentInput" name="Comment" />
         <dataInput id="_3_SkippableInput" name="Skippable" />
         <dataInput id="_3_ContentInput" name="Content" />
         <dataInput id="_3_TaskNameInput" name="TaskName" />
         <dataInput id="_3_PriorityInput" name="Priority" />
         <inputSet>
+          <dataInputRefs>_3_paymentMethodInput</dataInputRefs>
           <dataInputRefs>_3_CommentInput</dataInputRefs>
           <dataInputRefs>_3_SkippableInput</dataInputRefs>
           <dataInputRefs>_3_ContentInput</dataInputRefs>
@@ -33,6 +45,10 @@
         <outputSet>
         </outputSet>
       </ioSpecification>
+      <dataInputAssociation>
+        <sourceRef>paymentMethod</sourceRef>
+        <targetRef>_3_paymentMethodInput</targetRef>
+      </dataInputAssociation>
       <dataInputAssociation>
         <targetRef>_3_CommentInput</targetRef>
         <assignment>
@@ -50,7 +66,7 @@
       <dataInputAssociation>
         <targetRef>_3_ContentInput</targetRef>
         <assignment>
-          <from xsi:type="tFormalExpression"></from>
+          <from xsi:type="tFormalExpression">Content=content</from>
           <to xsi:type="tFormalExpression">_3_ContentInput</to>
         </assignment>
       </dataInputAssociation>
@@ -70,17 +86,36 @@
       </dataInputAssociation>
       <potentialOwner>
         <resourceAssignmentExpression>
-          <formalExpression></formalExpression>
+          <formalExpression>john</formalExpression>
         </resourceAssignmentExpression>
       </potentialOwner>
     </userTask>
     <endEvent id="_4" name="End" >
         <terminateEventDefinition/>
     </endEvent>
+    <exclusiveGateway id="_5" name="Gateway" gatewayDirection="Diverging" />
+    <task id="_6" name="Shipping" tns:taskName="Log" >
+      <ioSpecification>
+        <inputSet>
+        </inputSet>
+        <outputSet>
+        </outputSet>
+      </ioSpecification>
+    </task>
+    <endEvent id="_7" name="End" >
+        <terminateEventDefinition/>
+    </endEvent>
 
     <!-- connections -->
-    <sequenceFlow id="_1-_3" sourceRef="_1" targetRef="_3" />
-    <sequenceFlow id="_3-_4" sourceRef="_3" targetRef="_4" />
+    <sequenceFlow id="_5-_3" sourceRef="_5" targetRef="_3" name="payingOnAccount" tns:priority="1" >
+      <conditionExpression xsi:type="tFormalExpression" language="http://www.java.com/java" >return (paymentMethod.equals("account"));</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_6-_4" sourceRef="_6" targetRef="_4" />
+    <sequenceFlow id="_1-_5" sourceRef="_1" targetRef="_5" />
+    <sequenceFlow id="_5-_6" sourceRef="_5" targetRef="_6" name="payingByCreditCard" tns:priority="1" >
+      <conditionExpression xsi:type="tFormalExpression" language="http://www.java.com/java" >return (paymentMethod.equals("creditCard"));</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_3-_7" sourceRef="_3" targetRef="_7" />
 
   </process>
 
@@ -90,18 +125,39 @@
         <dc:Bounds x="0" y="0" width="48" height="48" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="_3" >
-        <dc:Bounds x="216" y="14" width="100" height="48" />
+        <dc:Bounds x="181" y="211" width="100" height="48" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="_4" >
-        <dc:Bounds x="613" y="87" width="48" height="48" />
+        <dc:Bounds x="616" y="51" width="48" height="48" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge bpmnElement="_1-_3" >
-        <di:waypoint x="24" y="24" />
-        <di:waypoint x="266" y="38" />
+      <bpmndi:BPMNShape bpmnElement="_5" >
+        <dc:Bounds x="114" y="95" width="48" height="48" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_6" >
+        <dc:Bounds x="406" y="46" width="128" height="57" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_7" >
+        <dc:Bounds x="610" y="236" width="48" height="48" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="_5-_3" >
+        <di:waypoint x="138" y="119" />
+        <di:waypoint x="231" y="235" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="_3-_4" >
-        <di:waypoint x="266" y="38" />
-        <di:waypoint x="637" y="111" />
+      <bpmndi:BPMNEdge bpmnElement="_6-_4" >
+        <di:waypoint x="470" y="74" />
+        <di:waypoint x="640" y="75" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_1-_5" >
+        <di:waypoint x="24" y="24" />
+        <di:waypoint x="138" y="119" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_5-_6" >
+        <di:waypoint x="138" y="119" />
+        <di:waypoint x="470" y="74" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_3-_7" >
+        <di:waypoint x="231" y="235" />
+        <di:waypoint x="634" y="260" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

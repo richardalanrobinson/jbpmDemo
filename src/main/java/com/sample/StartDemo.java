@@ -30,14 +30,13 @@ public class StartDemo {
 
 			ksession.getWorkItemManager().registerWorkItemHandler("Human Task", new WSHumanTaskHandler());
 
-			//Map<String, Object> params = new HashMap<String, Object>();
-			//params.put("customerId", "12345");
-			//params.put("productId", "ABCD");
-			//params.put("price", 51);
-			//params.put("paymentMethod", "account");
-			//params.put("approved", false);
-			
-			ksession.startProcess(processId); // , params);
+			Map<String, Object> params = new HashMap<String, Object>();
+			params.put("customerId", "12345");
+			params.put("productId", "B");
+			params.put("shippingMethod", "ground");
+			params.put("paymentMethod", "account"); // triggers xor gateway logic
+
+			ksession.startProcess(processId, params);
 			
 			logger.close();
 			

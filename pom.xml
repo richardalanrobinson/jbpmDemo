@@ -6,6 +6,8 @@
   <name>jbpmDemo</name>
   <description>JBPM Demo for JavaOne 2011</description>
   <build>
-  	<finalName>${artifactId}</finalName>
+  	<finalName>${project.artifactId}</finalName>
   </build>
+  <dependencies>
+  </dependencies>
 </project>
